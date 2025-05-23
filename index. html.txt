@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ছোট ব্যবসার অনলাইন শপ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0; background: #f8f8f8;
+    }
+    header {
+      background: #2c3e50; color: white; padding: 1rem; text-align: center;
+    }
+    h1 {
+      margin: 0;
+    }
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 1rem;
+      gap: 1rem;
+    }
+    .product-card {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 200px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .product-card input[type="number"] {
+      width: 60px;
+      margin: 0.5rem 0;
+    }
+    .product-card button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .product-card button:hover {
+      background: #219150;
+    }
+    .cart {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #e74c3c;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .clear-btn {
+      position: fixed;
+      top: 4rem;
+      right: 1rem;
+      background: #34495e;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>আমার ছোট ব্যবসার দোকান</h1>
+  </header>
+
+  <div class="cart" onclick="alertCart()">
+    🛒 কার্ট (<span id="cart-count">0</span>)
+  </div>
+  <div class="clear-btn" onclick="clearCart()">🧹 কার্ট খালি করো</div>
+
+  <div class="products" id="products">
+    <!-- পণ্য গুলো এখানে যোগ করা হবে -->
+  </div>
+
+  <script>
+    const products = [
+      {
+        id: 1,
+        name: "মধুর আপেল",
+        price: ১০০,
+        image: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=200&q=80"
+      },
+      {
+        id: 2,
+        name: "তাজা কলা",
+        price: ৫০,
+        image: "https://images.unsplash.com/photo-1574226516831-e1dff420e8f8?auto=format&fit=crop&w=200&q=80"
+      },
+      {
+        id: 3,
+        name: "সুগন্ধি মোমবাতি",
+        price: ১৫০,
+        image: "https://images.unsplash.com/photo-1509228627152-1f5318f5a8b4?auto=format&fit=crop&w=200&q=80"
+      }
+    ];
+
+    let cart = [];
+
+    const productsDiv = document.getElementById("products");
+
+    function displayProducts() {
+      productsDiv.innerHTML = "";
+      products.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" />
+          <h3>${product.name}</h3>
+          <p>মূল্য: ${product.price} টাকা</p>
+          <input type="number" min="1" value="1" id="qty-${product.id}" />
+          <button onclick="addToCart(${product.id})">কার্টে যোগ করো</button>
+        `;
+        productsDiv.appendChild(card);
+      });
+    }
+
+    function addToCart(id) {
+      const qtyInput = document.getElementById(`qty-${id}`);
+      const quantity = parseInt(qtyInput.value) || 1;
+      for (let i = 0; i < quantity; i++) {
+        cart.push(id);
+      }
+      updateCartCount();
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function updateCartCount() {
+      document.getElementById("cart-count").innerText = cart.length;
+    }
+
+    function alertCart() {
+      if (cart.length === 0) {
+        alert("তোমার কার্ট খালি।");
+      } else {
+        let message = "তোমার কার্টে আছে:\n";
+        const cartItems = {};
+        let total = 0;
+        cart.forEach(id => {
+          cartItems[id] = (cartItems[id] || 0) + 1;
+        });
+        for (const id in cartItems) {
+          const product = products.find(p => p.id == id);
+          const count = cartItems[id];
+          message += `${product.name} - ${count} টি\n`;
+          total += product.price * count;
+        }
+        message += `\nমোট: ${total} টাকা`;
+        alert(message);
+      }
+    }
+
+    function clearCart() {
+      if (confirm("আপনি কি নিশ্চিত কার্ট খালি করতে চান?")) {
+        cart = [];
+        localStorage.removeItem("cart");
+        updateCartCount();
+        alert("কার্ট খালি করা হয়েছে।");
+      }
+    }
+
+    window.onload = function () {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        cart = JSON.parse(savedCart);
+        updateCartCount();
+      }
+      displayProducts();
+    };
+  </script>
+</body>
+</html>
